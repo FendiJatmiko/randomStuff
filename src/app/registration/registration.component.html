@@ -18,7 +18,8 @@
           <th scope="row">{{ i + 1 }}</th>
           <td>{{ registration.firstName }}</td>
           <td>{{ registration.lastName }}</td>
-          <td>{{ registration.dob.day + '/' + registration.dob.month + '/' + registration.dob.year}}</td>
+          <!-- <td>{{ registration.dob.day + '/' + registration.dob.month + '/' + registration.dob.year}}</td> -->
+          <td>{{ registration.dob | date:"dd/MM/yyyy"}}</td>
           <td>{{ registration.email }}</td>
           <td>{{ registration.country }}</td>
           <td>

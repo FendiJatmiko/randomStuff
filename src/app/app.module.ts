@@ -10,6 +10,10 @@ import { HomeComponent } from './home/home.component';
 import { RegistrationComponent } from './registration/registration.component';
 import { FormsModule } from '@angular/forms';
 
+//Apollo Client implementation
+import { GraphQLModule } from "./graphql.module";
+
+
 
 @NgModule({
   declarations: [
@@ -22,7 +26,8 @@ import { FormsModule } from '@angular/forms';
     BrowserModule,
     AppRoutingModule,
     NgbModule.forRoot(),
-    FormsModule
+    FormsModule,
+    GraphQLModule
   ],
   providers: [],
   bootstrap: [AppComponent]

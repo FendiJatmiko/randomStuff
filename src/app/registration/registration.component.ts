@@ -1,67 +1,187 @@
-import { Component, OnInit } from '@angular/core';
-import { NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
+import { Component, OnInit } from "@angular/core";
+import { NgbDateStruct } from "@ng-bootstrap/ng-bootstrap";
+import { Apollo } from "apollo-angular";
+import gql from "graphql-tag";
+import { Observable } from "rxjs/Observable";
+import "rxjs/add/operator/map";
 
 class Registration {
   constructor(
-    public firstName: string = '',
-    public lastName: string = '',
+    public firstName: string = "",
+    public lastName: string = "",
     public dob: NgbDateStruct = null,
-    public email: string = '',
-    public password: string = '',
-    public country: string = 'Select country'
+    public email: string = "",
+    public password: string = "",
+    public country: string = "Select country"
   ) {}
 }
 
 @Component({
-  selector: 'app-registration',
-  templateUrl: './registration.component.html',
-  styleUrls: ['./registration.component.css']
+  selector: "app-registration",
+  templateUrl: "./registration.component.html",
+  styleUrls: ["./registration.component.css"]
 })
 export class RegistrationComponent implements OnInit {
   // It maintains list of Registrations
-  registrations: Registration[] = [];
+  registrations: Array<any> = [];
   // It maintains registration Model
   regModel: Registration;
   // It maintains registration form display status. By default it will be false.
   showNew: Boolean = false;
   // It will be either 'Save' or 'Update' based on operation.
-  submitType: string = 'Save';
+  submitType: string = "Save";
   // It maintains table row index based on selection.
   selectedRow: number;
   // It maintains Array of countries.
-  countries: string[] = ['US', 'UK', 'India', 'UAE'];
-  constructor() {
-    // Add default registration data.
-    this.registrations.push(new Registration('Johan', 'Peter', {year: 1980, month: 5, day: 12}, 'johan@gmail.com', 'johan123', 'UK'));
-    this.registrations.push(new Registration('Mohamed', 'Tariq', {year: 1975, month: 12, day: 3}, 'tariq@gmail.com', 'tariq123', 'UAE'));
-    this.registrations.push(new Registration('Nirmal', 'Kumar', {year: 1970, month: 7, day: 25}, 'nirmal@gmail.com', 'nirmal123', 'India'));
+  countries: string[] = ["US", "UK", "India", "UAE"];
+
+  registrationList: Array<any> = []; // List of Users
+
+  comments: Observable<any>;
+
+  constructor(private apollo: Apollo) {}
+
+  ngOnInit() {
+    this.displayRegistrations();
   }
 
-  ngOnInit() {}
+  // Get all registrations
+  displayRegistrations() {
+    const getRegistrations = gql`
+      {
+        Registrations {
+          id
+          firstName
+          lastName
+          dob
+          email
+          country
+        }
+      }
+    `;
+
+    this.apollo
+      .watchQuery({
+        query: getRegistrations,
+        fetchPolicy: "network-only"
+      })
+      .valueChanges.map((result: any) => result.data.Registrations)
+      .subscribe(data => {
+        this.registrations = data;
+      });
+  }
 
   // This method associate to New Button.
   onNew() {
     // Initiate new registration.
     this.regModel = new Registration();
     // Change submitType to 'Save'.
-    this.submitType = 'Save';
+    this.submitType = "Save";
     // display registration entry section.
     this.showNew = true;
   }
 
   // This method associate to Save Button.
   onSave() {
-    if (this.submitType === 'Save') {
+    var dateVal =
+      this.regModel.dob.year.toString() +
+      "-" +
+      this.regModel.dob.month.toString() +
+      "-" +
+      this.regModel.dob.day.toString();
+    if (this.submitType === "Save") {
+      const saveRegistration = gql`
+        mutation createRegistration(
+          $firstName: String!
+          $lastName: String!
+          $dob: GQDate!
+          $email: String!
+          $password: String!
+          $country: String!
+        ) {
+          createRegistration(
+            firstName: $firstName
+            lastName: $lastName
+            dob: $dob
+            email: $email
+            password: $password
+            country: $country
+          ) {
+            id
+            dob
+          }
+        }
+      `;
+      this.apollo
+        .mutate({
+          mutation: saveRegistration,
+          variables: {
+            firstName: this.regModel.firstName,
+            lastName: this.regModel.lastName,
+            dob: new Date(dateVal),
+            email: this.regModel.email,
+            password: this.regModel.password,
+            country: this.regModel.country
+          }
+        })
+        .subscribe(
+          ({ data }) => {
+            this.displayRegistrations();
+          },
+          error => {
+            console.log("there was an error sending the query", error);
+          }
+        );
+
       // Push registration model object into registration list.
-      this.registrations.push(this.regModel);
+      // this.registrations.push(this.regModel);
     } else {
-      // Update the existing properties values based on model.
-      this.registrations[this.selectedRow].firstName = this.regModel.firstName;
-      this.registrations[this.selectedRow].lastName = this.regModel.lastName;
-      this.registrations[this.selectedRow].dob = this.regModel.dob;
-      this.registrations[this.selectedRow].email = this.regModel.email;
-      this.registrations[this.selectedRow].password = this.regModel.password;
-      this.registrations[this.selectedRow].country = this.regModel.country;
+      const updateRegistration = gql`
+        mutation updateRegistration(
+          $id: ID!
+          $firstName: String!
+          $lastName: String!
+          $dob: GQDate!
+          $email: String!
+          $password: String!
+          $country: String!
+        ) {
+          updateRegistration(
+            id: $id
+            firstName: $firstName
+            lastName: $lastName
+            dob: $dob
+            email: $email
+            password: $password
+            country: $country
+          ) {
+            id
+            country
+          }
+        }
+      `;
+      this.apollo
+        .mutate({
+          mutation: updateRegistration,
+          variables: {
+            id: this.selectedRow + 1,
+            firstName: this.regModel.firstName,
+            lastName: this.regModel.lastName,
+            dob: new Date(dateVal),
+            email: this.regModel.email,
+            password: this.regModel.password,
+            country: this.regModel.country
+          }
+        })
+        .subscribe(
+          ({ data }) => {
+            console.log("got editdata", data);
+            this.displayRegistrations();
+          },
+          error => {
+            console.log("there was an error sending the query", error);
+          }
+        );
     }
     // Hide registration entry section.
     this.showNew = false;
@@ -75,16 +195,45 @@ export class RegistrationComponent implements OnInit {
     this.regModel = new Registration();
     // Retrieve selected registration from list and assign to model.
     this.regModel = Object.assign({}, this.registrations[this.selectedRow]);
+    const dob = new Date(this.registrations[this.selectedRow].dob);
+
+    this.regModel.dob = {
+      day: dob.getDate(),
+      month: dob.getMonth() + 1,
+      year: dob.getFullYear()
+    };
+
     // Change submitType to Update.
-    this.submitType = 'Update';
+    this.submitType = "Update";
     // Display registration entry section.
     this.showNew = true;
   }
 
   // This method associate to Delete Button.
   onDelete(index: number) {
-    // Delete the corresponding registration entry from the list.
-    this.registrations.splice(index, 1);
+    const deleteRegistration = gql`
+      mutation deleteRegistration($id: ID!) {
+        deleteRegistration(id: $id) {
+          id
+        }
+      }
+    `;
+    this.apollo
+      .mutate({
+        mutation: deleteRegistration,
+        variables: {
+          id: index + 1
+        }
+      })
+      .subscribe(
+        ({ data }) => {
+          console.log("got editdata", data);
+          this.displayRegistrations();
+        },
+        error => {
+          console.log("there was an error sending the query", error);
+        }
+      );
   }
 
   // This method associate toCancel Button.
@@ -98,5 +247,4 @@ export class RegistrationComponent implements OnInit {
     // Assign corresponding selected country to model.
     this.regModel.country = country;
   }
-
 }
