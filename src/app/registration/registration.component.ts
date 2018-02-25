@@ -5,15 +5,25 @@ import gql from "graphql-tag";
 import { Observable } from "rxjs/Observable";
 import "rxjs/add/operator/map";
 
-class Registration {
+// class Registration {
+//   constructor(
+//     public firstName: string = "",
+//     public lastName: string = "",
+//     public dob: NgbDateStruct = null,
+//     public email: string = "",
+//     public password: string = "",
+//     public country: string = "Select country"
+//   ) {}
+// }
+
+class ReturnAuth {
   constructor(
-    public firstName: string = "",
-    public lastName: string = "",
-    public dob: NgbDateStruct = null,
-    public email: string = "",
+    public userid: string = "",
+    public username: string = "",
     public password: string = "",
-    public country: string = "Select country"
-  ) {}
+    public phonenumber: string = "",
+    public idmerchan: string = ""
+  ){}
 }
 
 @Component({
@@ -23,9 +33,10 @@ class Registration {
 })
 export class RegistrationComponent implements OnInit {
   // It maintains list of Registrations
-  registrations: Array<any> = [];
+  // registrations: Array<any> = [];
+  login: Array<any> = [];
   // It maintains registration Model
-  regModel: Registration;
+  regModel: ReturnAuth ;
   // It maintains registration form display status. By default it will be false.
   showNew: Boolean = false;
   // It will be either 'Save' or 'Update' based on operation.
@@ -33,48 +44,46 @@ export class RegistrationComponent implements OnInit {
   // It maintains table row index based on selection.
   selectedRow: number;
   // It maintains Array of countries.
-  countries: string[] = ["US", "UK", "India", "UAE"];
+  // countries: string[] = ["US", "sUK", "India", "UAE"];
 
-  registrationList: Array<any> = []; // List of Users
-
+  // registrationList: Array<any> = []; // List of Users
+  loginList: Array<any> = [];
   comments: Observable<any>;
 
   constructor(private apollo: Apollo) {}
 
   ngOnInit() {
-    this.displayRegistrations();
+    // this.displayRegistrations();
+    this.displayReturnAuth();
   }
 
   // Get all registrations
-  displayRegistrations() {
-    const getRegistrations = gql`
+  displayReturnAuth() {
+    // const getRegistrations = gql`
+      const getReturnAuths = gql`
       {
-        Registrations {
+        ReturnAuths {
           id
-          firstName
-          lastName
-          dob
-          email
-          country
+          token
         }
       }
     `;
 
     this.apollo
       .watchQuery({
-        query: getRegistrations,
+        query: getReturnAuths,
         fetchPolicy: "network-only"
       })
       .valueChanges.map((result: any) => result.data.Registrations)
       .subscribe(data => {
-        this.registrations = data;
+        this.login = data;
       });
   }
 
   // This method associate to New Button.
   onNew() {
     // Initiate new registration.
-    this.regModel = new Registration();
+    this.regModel = new ReturnAuth();
     // Change submitType to 'Save'.
     this.submitType = "Save";
     // display registration entry section.
@@ -83,50 +92,49 @@ export class RegistrationComponent implements OnInit {
 
   // This method associate to Save Button.
   onSave() {
-    var dateVal =
-      this.regModel.dob.year.toString() +
-      "-" +
-      this.regModel.dob.month.toString() +
-      "-" +
-      this.regModel.dob.day.toString();
+    // var dateVal =
+    //   this.regModel.dob.year.toString() +
+    //   "-" +
+    //   this.regModel.dob.month.toString() +
+    //   "-" +
+    //   this.regModel.dob.day.toString();
     if (this.submitType === "Save") {
-      const saveRegistration = gql`
-        mutation createRegistration(
-          $firstName: String!
-          $lastName: String!
-          $dob: GQDate!
-          $email: String!
+      // const saveRegistration = gql`
+      const saveLogin = gql`
+        mutation createLogin(
+          $userid: String!
+          $username: String!
           $password: String!
-          $country: String!
+          $phonenumber: String!
+          $idmerchan: String!
         ) {
-          createRegistration(
-            firstName: $firstName
-            lastName: $lastName
-            dob: $dob
-            email: $email
+          createLogin(
+            iduser: $userid
+            username: $username
             password: $password
-            country: $country
+            phonenumber: $phonenumber
+            idmerchan: $idmerchan
           ) {
             id
-            dob
+            token
           }
         }
       `;
       this.apollo
         .mutate({
-          mutation: saveRegistration,
+          mutation: saveLogin,
           variables: {
-            firstName: this.regModel.firstName,
-            lastName: this.regModel.lastName,
-            dob: new Date(dateVal),
-            email: this.regModel.email,
+            iduser: this.regModel.userid,
+            username: this.regModel.username,
             password: this.regModel.password,
-            country: this.regModel.country
+            phonenumber: this.regModel.phonenumber,
+            idmerchan: this.regModel.idmerchan,
           }
         })
         .subscribe(
           ({ data }) => {
-            this.displayRegistrations();
+            
+            this.displayReturnAuth();
           },
           error => {
             console.log("there was an error sending the query", error);
@@ -136,47 +144,41 @@ export class RegistrationComponent implements OnInit {
       // Push registration model object into registration list.
       // this.registrations.push(this.regModel);
     } else {
-      const updateRegistration = gql`
-        mutation updateRegistration(
-          $id: ID!
-          $firstName: String!
-          $lastName: String!
-          $dob: GQDate!
-          $email: String!
+      const updateLogin = gql`
+        mutation updateLogin(
+          $iduser: String!
+          $username: String!
           $password: String!
-          $country: String!
+          $phonenumber: String!
+          $idmerchan: String!
         ) {
-          updateRegistration(
-            id: $id
-            firstName: $firstName
-            lastName: $lastName
-            dob: $dob
-            email: $email
+          updateLogin(
+            iduser: $iduser 
+            username: $username
             password: $password
-            country: $country
+            phonenumber: $phonenumber
+            idmerchan: $idmerchan
           ) {
             id
-            country
+            token
           }
         }
       `;
       this.apollo
         .mutate({
-          mutation: updateRegistration,
+          mutation: updateLogin,
           variables: {
-            id: this.selectedRow + 1,
-            firstName: this.regModel.firstName,
-            lastName: this.regModel.lastName,
-            dob: new Date(dateVal),
-            email: this.regModel.email,
+            iduser: this.selectedRow + 1,
+            username: this.regModel.username,
             password: this.regModel.password,
-            country: this.regModel.country
+            phonenumber: this.regModel.phonenumber,
+            idmerchan: this.regModel.idmerchan
           }
         })
         .subscribe(
           ({ data }) => {
-            console.log("got editdata", data);
-            this.displayRegistrations();
+            console.log("got edit data", data);
+            this.displayReturnAuth();
           },
           error => {
             console.log("there was an error sending the query", error);
@@ -192,16 +194,16 @@ export class RegistrationComponent implements OnInit {
     // Assign selected table row index.
     this.selectedRow = index;
     // Initiate new registration.
-    this.regModel = new Registration();
+    this.regModel = new ReturnAuth();
     // Retrieve selected registration from list and assign to model.
-    this.regModel = Object.assign({}, this.registrations[this.selectedRow]);
-    const dob = new Date(this.registrations[this.selectedRow].dob);
+    this.regModel = Object.assign({}, this.login[this.selectedRow]);
+    const dob = new Date(this.login[this.selectedRow].dob);
 
-    this.regModel.dob = {
-      day: dob.getDate(),
-      month: dob.getMonth() + 1,
-      year: dob.getFullYear()
-    };
+    // this.regModel.dob = {
+    //   day: dob.getDate(),
+    //   month: dob.getMonth() + 1,
+    //   year: dob.getFullYear()
+    // };
 
     // Change submitType to Update.
     this.submitType = "Update";
@@ -228,10 +230,10 @@ export class RegistrationComponent implements OnInit {
       .subscribe(
         ({ data }) => {
           console.log("got editdata", data);
-          this.displayRegistrations();
+          this.displayReturnAuth();
         },
         error => {
-          console.log("there was an error sending the query", error);
+          console.log("there was an error sending the query delete", error);
         }
       );
   }
@@ -243,8 +245,8 @@ export class RegistrationComponent implements OnInit {
   }
 
   // This method associate to Bootstrap dropdown selection change.
-  onChangeCountry(country: string) {
-    // Assign corresponding selected country to model.
-    this.regModel.country = country;
-  }
+  // onChangeCountry(country: string) {
+  //   // Assign corresponding selected country to model.
+  //   this.regModel.country = country;
+  // }
 }

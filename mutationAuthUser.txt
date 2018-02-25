@@ -1,0 +1,11 @@
+authuser(iduser:"",username:"",password:"",phonenumber:"") 
+{message, id, token)
+
+ReturnAuth
+
+
+mutation{
+authuser(iduser:"1",username:"s1gu",password:"12345",phonenumber:"6282325600996",idmerchan:"1") {
+    id, token
+	} 
+}

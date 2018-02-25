@@ -4,24 +4,26 @@
       <thead>
         <tr>
           <th>#</th>
-          <th>First Name</th>
-          <th>Last Name</th>
-          <th>DOB</th>
-          <th>Email</th>
-          <th>Country</th>
+          <th>user id </th>
+          <th>username</th>
+          <th>password</th>
+          <th>phonenumber</th>
+          <th>idmerchan</th>
+          <th></th>
           <th></th>
           <th></th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let registration of registrations; let i = index">
+        <tr *ngFor="let login of login; let i = index">
           <th scope="row">{{ i + 1 }}</th>
-          <td>{{ registration.firstName }}</td>
-          <td>{{ registration.lastName }}</td>
+          <td>{{ login.userid }}</td>
+          <!-- <td>{{ registration.lastName }}</td> -->
+          <td>{{ login.username }}</td>
           <!-- <td>{{ registration.dob.day + '/' + registration.dob.month + '/' + registration.dob.year}}</td> -->
-          <td>{{ registration.dob | date:"dd/MM/yyyy"}}</td>
-          <td>{{ registration.email }}</td>
-          <td>{{ registration.country }}</td>
+          <!-- <td>{{ registration.dob | date:"dd/MM/yyyy"}}</td> -->
+          <td>{{ login.phonenumber }}</td>
+          <td>{{ login.idmerchan }}</td>
           <td>
             <button type="button" class="btn btn-info" (click)="onEdit(i)">Edit</button>
           </td>
@@ -32,25 +34,27 @@
       </tbody>
     </table>
     <div class="text-right">
-      <button type="submit" class="btn btn-primary" (click)="onNew()">New</button>
+      <button type="submit" class="btn btn-primary" (click)="onNew()">Login</button>
     </div>
   </div>
   <br>
   <div class="regentry" *ngIf="showNew">
     <form (ngSubmit)="onSave()">
       <div class="form-group row">
-        <label for="firstname-input" class="col-2 col-form-label">First Name</label>
+        <label for="firstname-input" class="col-2 col-form-label">User ID</label>
         <div class="col-10">
-          <input class="form-control" type="text" [(ngModel)]="regModel.firstName" name="firstName">
+          <input class="form-control" type="text" [(ngModel)]="regModel.userid" name="firstName">
         </div>
       </div>
+
       <div class="form-group row">
-        <label for="lastname-input" class="col-2 col-form-label">Last Name</label>
+        <label for="lastname-input" class="col-2 col-form-label">User Name</label>
         <div class="col-10">
-          <input class="form-control" type="text" [(ngModel)]="regModel.lastName" name="lastName">
+          <input class="form-control" type="text" [(ngModel)]="regModel.username" name="lastName">
         </div>
       </div>
-      <div class="form-group row">
+
+      <!-- <div class="form-group row">
         <label for="dob-input" class="col-2 col-form-label">DOB</label>
         <div class="col-3 input-group">
           <input type="text" class="form-control" placeholder="yyyy-mm-dd" name="dob" [(ngModel)]="regModel.dob" ngbDatepicker #dob="ngbDatepicker">
@@ -58,13 +62,7 @@
             <img src="assets/img/calendar-icon.svg" style="width: 1.2rem; height: 1rem; cursor: pointer;" />
           </button>
         </div>
-      </div>
-      <div class="form-group row">
-        <label for="example-email-input" class="col-2 col-form-label">Email</label>
-        <div class="col-10">
-          <input class="form-control" type="email" [(ngModel)]="regModel.email" name="email">
-        </div>
-      </div>
+      </div> -->
       <div class="form-group row">
         <label for="example-password-input" class="col-2 col-form-label">Password</label>
         <div class="col-10">
@@ -72,11 +70,24 @@
         </div>
       </div>
       <div class="form-group row">
-        <label for="city-input" class="col-2 col-form-label">Country</label>
+        <label for="example-email-input" class="col-2 col-form-label">PhoneNumber</label>
+        <div class="col-10">
+          <input class="form-control" type="email" [(ngModel)]="regModel.phonenumber" name="email">
+        </div>
+      </div>   
+      <div class="form-group row">
+        <label for="example-idmerchan-input" class="col-2 col-form-label">ID Merchan</label>
+        <div class="col-10">
+          <input class="form-control" type="email" [(ngModel)]="regModel.idmerchan" name="email">
+        </div>
+      </div>
+   
+      <div class="form-group row">
+        <!-- <label for="city-input" class="col-2 col-form-label">Country</label> -->
         <div class="col-10 dropdown" ngbDropdown myDrop="ngbDropdown">
-          <button type="button" class="btn btn-outline-primary" id="dropdownManual" name="country" ngbDropdownToggle>{{regModel.country}}</button>
+          <!-- <button type="button" class="btn btn-outline-primary" id="dropdownManual" name="country" ngbDropdownToggle>{{regModel.country}}</button> -->
           <div ngbDropdownMenu aria-labelledby="dropdownManual">
-            <button type="button" class="dropdown-item" *ngFor="let country of countries" (click)="onChangeCountry(country)">{{country}}</button>
+            <!-- <button type="button" class="dropdown-item" *ngFor="let country of countries" (click)="onChangeCountry(country)">{{country}}</button> -->
           </div>
         </div>
       </div>
